@@ -8,7 +8,6 @@ export default () => {
 
     const fetchPosts = async () => {
         const response = await axios.get('http://localhost:4000/posts');
-        console.log(posts);
         setPosts(response.data);
     };
 
