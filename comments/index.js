@@ -7,17 +7,15 @@ const app = express();
 app.use(express.json());        // Parse JSON bodies
 app.use(cors());
 
-const postComments = new Map();
+var comments = new Map();
 
 app.get('/posts/:id/comments', (req, res) => {
-    console.log("Comments: Processing GET to /comments...");
     const postID  = req.params.id;
 
-    res.send(postComments.get(postID) || []);
+    res.send(comments.get(postID));
 });
 
 app.post('/posts/:id/comments', (req, res) => {
-    console.log("Comments: Processing POST to /comments...");
     const postID  = req.params.id;
     const { comment } = req.body;
 
@@ -27,7 +25,7 @@ app.post('/posts/:id/comments', (req, res) => {
         // Create new comment
         const newCommentID = addNewComment(postID, comment);
         // Create new comment event
-        const event = { "eventType": "NewComment", "eventData": { "postID": postID, "postComment": comment }};
+        const event = { "eventType": "NewComment", "eventData": { "postID": postID, "commentID" : newCommentID, "comment": comment }};
         // Publish new post event
         axios.post("http://localhost:4005/events", event)
             .then(response => {
@@ -38,17 +36,16 @@ app.post('/posts/:id/comments', (req, res) => {
                 console.log("Failed to publish new comment event. ID: " + newCommentID + ". Error: " + e);
             });
 
-        res.status(201).send(Object.fromEntries(postComments));
+        res.status(201).send(Object.fromEntries(comments));
     }
 });
 
 app.post("/events", (req, res) => {
-    console.log("Comments: Processing POST to /events...");
     const event = req.body;
 
     if (event.eventType == "NewPost") {
         // Register new Post with no initial comments
-        postComments.set(event.eventData.postID, []);
+        comments.set(event.eventData.postID, []);
     } else {
         console.log("Ignoring events of type: " + event.eventType);
         // res.status(400).send("Unsupported event type: " + event.eventType);
@@ -64,16 +61,19 @@ app.listen(4001, () => {
 function addNewComment(postID, comment) {
     const commentID = randomBytes(4).toString("hex");
 
-    if (postComments.has(postID)) {
+    if (comments && comments.has(postID)) {
         // Get to current comments
-        var comments = postComments.get(postID);
+        var comments = comments.get(postID);
         // Append new comment
         comments.push({id: commentID, comment});
         // Update post
-        postComments.set(postID, comments);
+        comments.set(postID, comments);
     } else {
         // Create first post comment
-        postComments.set(postID, [{id: commentID, comment}]);
+        if (!comments) {
+            comments = new Map();
+        }
+        comments.set(postID, [{id: commentID, comment}]);
     }
 
     return commentID;

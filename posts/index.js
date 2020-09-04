@@ -10,12 +10,10 @@ app.use(cors());
 const posts = new Map();
 
 app.get('/posts', (req, res) => {
-    console.log("Posts: Processing GET to /posts...");
     res.send(Object.fromEntries(posts));
 });
 
 app.post('/posts', (req, res) => {
-    console.log("Posts: Processing POST to /posts...");
     const { title } = req.body;
 
     if (title === undefined) {
@@ -41,11 +39,10 @@ app.post('/posts', (req, res) => {
 });
 
 app.post("/events", (req, res) => {
-    console.log("Posts: Processing POST to /events...");
     const event = req.body;
 
     if (event.eventType == "NewComment") {
-        addNewComment(event.eventData.postID, event.eventData.postComment);
+        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment);
     } else {
         console.log("Ignoring events of type: " + event.eventType);    
         // res.status(400).send("Unsupported event type: " + event.eventType);
@@ -58,10 +55,10 @@ app.listen(4000, () => {
     console.log("Posts: Listening for Blog Posts on 4000");
 });
 
-function addNewComment(postID, comment) {
-    if (posts.has(postID)) {
+function addNewComment(postID, commentID, comment) {
+    if (posts && posts.has(postID)) {
        const postComments = posts.get(postID).comments || [];
-       postComments.push(comment);
+       postComments.push({commentID, comment});
     } else {
         console.log("Invalid post id: " + postID);
     }

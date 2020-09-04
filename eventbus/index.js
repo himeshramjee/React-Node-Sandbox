@@ -14,7 +14,6 @@ const broadcastClientList = [
 ];
 
 app.get("/events", (req, res) => {
-    console.log("EventBus: Processing GET to /events...");
     res.send({ 
         eventCount : Object.keys(events) ? Object.keys(events).length : 0,
         subscriberCount : broadcastClientList.length
@@ -22,7 +21,6 @@ app.get("/events", (req, res) => {
 });
 
 app.post("/events", (req, res) => {
-    console.log("EventBus: Processing POST to /events...");
     const event = req.body;
     const eventID = randomBytes(4).toString("hex");
 
