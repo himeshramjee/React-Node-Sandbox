@@ -9,8 +9,10 @@ app.use(cors());
 
 const events = {};
 const broadcastClientList = [
-    { clientID : "0", clientEndpoint : "http://localhost:4000/events" },
-    { clientID : "1", clientEndpoint : "http://localhost:4001/events" }
+    // Poor mans service discovery anyone? :D
+    // { clientID : "0", clientEndpoint : "http://localhost:4000/events" },
+    // { clientID : "1", clientEndpoint : "http://localhost:4001/events" },
+    { clientID : "2", clientEndpoint : "http://localhost:4002/events" }
 ];
 
 app.get("/events", (req, res) => {

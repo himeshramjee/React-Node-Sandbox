@@ -23,7 +23,7 @@ app.post('/posts', (req, res) => {
         const newPostID = randomBytes(4).toString("hex");
         posts.set(newPostID, { title: title, comments: [] }); 
         // Create new post event
-        const event = { "eventType": "NewPost", "eventData": { "postID": newPostID, "postTitle": title }};
+        const event = { "eventType": "NewPost", "eventData": { "postID": newPostID, "title": title }};
         // Publish new post event
         axios.post("http://localhost:4005/events", event)
             .then(response => {
@@ -36,19 +36,6 @@ app.post('/posts', (req, res) => {
 
         res.status(201).send(newPostID);
     }
-});
-
-app.post("/events", (req, res) => {
-    const event = req.body;
-
-    if (event.eventType == "NewComment") {
-        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment);
-    } else {
-        console.log("Ignoring events of type: " + event.eventType);    
-        // res.status(400).send("Unsupported event type: " + event.eventType);
-    }
-    
-    res.status(200).send();
 });
 
 app.listen(4000, () => {

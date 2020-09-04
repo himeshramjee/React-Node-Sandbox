@@ -40,20 +40,6 @@ app.post('/posts/:id/comments', (req, res) => {
     }
 });
 
-app.post("/events", (req, res) => {
-    const event = req.body;
-
-    if (event.eventType == "NewPost") {
-        // Register new Post with no initial comments
-        comments.set(event.eventData.postID, []);
-    } else {
-        console.log("Ignoring events of type: " + event.eventType);
-        // res.status(400).send("Unsupported event type: " + event.eventType);
-    }
-
-    res.status(200).send();
-});
-
 app.listen(4001, () => {
     console.log("Comments: Listening for Blog Comments on 4001");
 });

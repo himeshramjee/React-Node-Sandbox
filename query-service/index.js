@@ -6,15 +6,23 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get("/posts", async (req, res) => {
-    // Get list of posts
-    var posts = {};
-    // const comments = {};
+var posts = new Map();
+
+app.get("/posts", (req, res) => {
+    res.status(200).send(Object.fromEntries(posts));
+});
+
+app.get("/posts/rebuild", async (req, res) => {
+    // Clear list of posts, we'll query each service and rebuild it.
+    // Obviously this mechanism wouldn't work for large datasets.
+    posts = new Map();
 
     // Fetch posts
     await axios.get("http://localhost:4000/posts")
         .then(response => {
-            posts = response.data;
+            Object.entries(response.data).map(([postID, post]) => {
+                addNewPost(postID, post.title, []);
+            });
         })
         .catch(e => {
             console.log("QueryService: Failed to retrieve posts. Error: " + e);
@@ -24,27 +32,46 @@ app.get("/posts", async (req, res) => {
     Object.entries(posts).map(async ([postID, post]) => {
         await axios.get(`http://localhost:4001/posts/${postID}/comments`)
             .then(response => {
-                // comments[postID] = response.data;
-                post.comments.push(comment);
+                Object.entries(response.data).map(([comment]) => {
+                    addNewComment(postID, comment.commentID, comment.comment);
+                });
             })
             .catch(e => {
                 console.log("Failed to retrieve comments for PostID: " + postID + ". Error: " + e);
             });
     });
 
-    // Compile data by adding comments to each post object
-    /*
-    Object.entries(comments).map(comment => {
-        if (posts[comment.postID]) {
-            posts[comment.postID].comments.push(comment);
-        } else {
-            console.log("Unable to match comments to PostID: " + comment.postID);
-        }
-    });*/
-
     res.status(200).send(posts);
 });
 
-app.listen(4003, () => {
-    console.log("QueryService: Listening for blog queries on port 4003.");
+app.post("/events", (req, res) => {
+    const event = req.body;
+
+    if (event.eventType === "NewPost") {
+        console.log("Processing new post event with ID: " + event.eventID);
+        addNewPost(event.eventData.postID, event.eventData.title, []);
+    }
+
+    if (event.eventType === "NewComment") {
+        console.log("Processing new comment event with ID: " + event.eventID);
+        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment);
+    }
+
+    res.status(200).send();
 });
+
+app.listen(4002, () => {
+    console.log("QueryService: Listening for blog queries on port 4002.");
+});
+
+function addNewPost(postID, postTitle, comments) {
+    posts.set(postID, { title: postTitle, comments: comments });
+    console.log("New Post from event: " + postTitle);
+}
+
+function addNewComment(postID, commentID, comment) {
+    if (posts && posts.has(postID)) {
+        const comments = posts.get(postID).comments || [];
+        comments.push({ commentID: commentID, comment: comment });
+    }
+}
