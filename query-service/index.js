@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const { static } = require("express");
 
 const app = express();
 app.use(express.json());
@@ -9,13 +10,15 @@ app.use(cors());
 var posts = new Map();
 
 app.get("/posts", (req, res) => {
+    console.log(posts);
+    console.log(Object.fromEntries(posts));
     res.status(200).send(Object.fromEntries(posts));
 });
 
 app.get("/posts/rebuild", async (req, res) => {
     // Clear list of posts, we'll query each service and rebuild it.
     // Obviously this mechanism wouldn't work for large datasets.
-    posts = new Map();
+    posts.clear();
 
     // Fetch posts
     await axios.get("http://localhost:4000/posts")
@@ -48,13 +51,15 @@ app.post("/events", (req, res) => {
     const event = req.body;
 
     if (event.eventType === "NewPost") {
-        console.log("Processing new post event with ID: " + event.eventID);
         addNewPost(event.eventData.postID, event.eventData.title, []);
     }
 
     if (event.eventType === "NewComment") {
-        console.log("Processing new comment event with ID: " + event.eventID);
-        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment);
+        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment, event.eventData.status, event.eventData.statusReason);
+    }
+
+    if (event.eventType === "CommentUpdated") {
+        updateComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment, event.eventData.status, event.eventData.statusReason);
     }
 
     res.status(200).send();
@@ -69,9 +74,23 @@ function addNewPost(postID, postTitle, comments) {
     console.log("New Post from event: " + postTitle);
 }
 
-function addNewComment(postID, commentID, comment) {
+function addNewComment(postID, commentID, comment, status, statusReason) {
     if (posts && posts.has(postID)) {
         const comments = posts.get(postID).comments || [];
-        comments.push({ commentID: commentID, comment: comment });
+        comments.push({ commentID: commentID, comment: comment, status: status, statusReason: statusReason });
+    }
+}
+
+function updateComment(postID, commentID, comment, status, statusReason) {
+    if (posts && posts.has(postID)) {
+        const comments = posts.get(postID).comments;
+        comments.map(commentItem => {
+            if (commentItem.commentID === commentID) {
+                commentItem.status = status;
+                commentItem.statusReason = statusReason;
+            }
+        });
+    } else {
+        console.log("Invalid PostID received for updateComment request. PostID: " + postID + ". CommentID: " + commentID);
     }
 }

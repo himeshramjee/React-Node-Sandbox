@@ -25,7 +25,15 @@ app.post('/posts/:id/comments', (req, res) => {
         // Create new comment
         const newCommentID = addNewComment(postID, comment);
         // Create new comment event
-        const event = { "eventType": "NewComment", "eventData": { "postID": postID, "commentID" : newCommentID, "comment": comment }};
+        const event = { 
+            eventType : "NewComment", 
+            eventData: { 
+                postID: postID, 
+                commentID : newCommentID, 
+                comment: comment, 
+                status: "Pending", 
+                statusReason: "Under moderation" 
+            }};
         // Publish new post event
         axios.post("http://localhost:4005/events", event)
             .then(response => {
@@ -51,7 +59,7 @@ function addNewComment(postID, comment) {
         // Get to current comments
         var comments = comments.get(postID);
         // Append new comment
-        comments.push({id: commentID, comment});
+        comments.push({ id: commentID, comment, status: "Pending", status: "Under moderation" });
         // Update post
         comments.set(postID, comments);
     } else {
@@ -59,7 +67,7 @@ function addNewComment(postID, comment) {
         if (!comments) {
             comments = new Map();
         }
-        comments.set(postID, [{id: commentID, comment}]);
+        comments.set(postID, [{ id: commentID, comment, status:"Pending", status: "Under moderation" }]);
     }
 
     return commentID;

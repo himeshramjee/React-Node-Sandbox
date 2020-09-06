@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default ({ postComments }) => {
-    const [comments, setComments] = useState([]);
+    const [commentItems, setComments] = useState([]);
     
     const loadData = () => { setComments(postComments) };
 
@@ -9,15 +9,21 @@ export default ({ postComments }) => {
         loadData();
     }, []);
 
-    const renderedComments = comments.map(comment => {
-        return <div key={comment.commentID}>
-                <li>{comment.comment}</li>
-               </div>
+    const renderedComments = commentItems.map(commentItem => {
+        if (commentItem.status == "Approved") {
+            return <div key={commentItem.commentID}>
+                <li title={"by Anonymous"}>{commentItem.comment}</li>
+               </div>    
+        } else {
+            return <div key={commentItem.commentID}>
+                    <li>{commentItem.status}: {commentItem.statusReason}</li>
+                </div>
+        }
     });
 
     return (
         <div className="">
-            <i>{comments.length} comments</i>
+            <i>{commentItems.length} comments</i>
             <ul>
                 {renderedComments}
             </ul>
