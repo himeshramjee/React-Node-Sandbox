@@ -53,7 +53,6 @@ function findNaughtyWord(comment) {
     let badItem = null;
 
     naughtyWords.forEach((item, key) => {
-       console.log("1. Checking word: " + item.word + " is in " + comment);
         if (comment.search(item.word) != -1) {
             badItem = item;
         }

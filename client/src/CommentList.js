@@ -10,7 +10,7 @@ export default ({ postComments }) => {
     }, []);
 
     const renderedComments = commentItems.map(commentItem => {
-        if (commentItem.status == "Approved") {
+        if (commentItem.status === "Approved") {
             return <div key={commentItem.commentID}>
                 <li title={"by Anonymous"}>{commentItem.comment}</li>
                </div>    

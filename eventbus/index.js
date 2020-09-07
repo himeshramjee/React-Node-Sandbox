@@ -7,14 +7,19 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const events = {};
+let events = {};
 const broadcastClientList = [
     // Poor mans service discovery anyone? :D
     // { clientID : "0", clientEndpoint : "http://localhost:4000/events" },
-    // { clientID : "1", clientEndpoint : "http://localhost:4001/events" },
+    { clientID : "1", clientEndpoint : "http://localhost:4001/events" },
     { clientID : "2", clientEndpoint : "http://localhost:4002/events" },
     { clientID : "3", clientEndpoint : "http://localhost:4003/events" }
 ];
+
+app.post('/event-bus/reset-data', (req, res) => {
+    events = {};
+    res.status(200).send();
+});
 
 app.get("/events", (req, res) => {
     res.send({ 

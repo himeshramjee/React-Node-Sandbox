@@ -38,15 +38,11 @@ app.post('/posts', (req, res) => {
     }
 });
 
+app.post('/posts/reset-data', (req, res) => {
+    posts.clear();
+    res.status(200).send();
+});
+
 app.listen(4000, () => {
     console.log("Posts: Listening for Blog Posts on 4000");
 });
-
-function addNewComment(postID, commentID, comment) {
-    if (posts && posts.has(postID)) {
-       const postComments = posts.get(postID).comments || [];
-       postComments.push({commentID, comment});
-    } else {
-        console.log("Invalid post id: " + postID);
-    }
-}

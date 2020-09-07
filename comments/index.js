@@ -9,9 +9,14 @@ app.use(cors());
 
 var comments = new Map();
 
+app.post('/comments/reset-data', (req, res) => {
+    comments.clear();
+    res.status(200).send();
+});
+
 app.get('/posts/:id/comments', (req, res) => {
     const postID  = req.params.id;
-
+    console.log("Comments requested for postID: " + postID);
     res.send(comments.get(postID));
 });
 
@@ -48,6 +53,16 @@ app.post('/posts/:id/comments', (req, res) => {
     }
 });
 
+app.post("/events", (req, res) => {
+    const event = req.body;
+
+    if (event.eventType === "CommentUpdated") {
+        if (event.eventData.status != "Pending") {
+            updateCommentStatus(event.eventData.postID, event.eventData.commentID, event.eventData.status, event.eventData.statusReason);
+        }
+    }
+});
+
 app.listen(4001, () => {
     console.log("Comments: Listening for Blog Comments on 4001");
 });
@@ -55,20 +70,39 @@ app.listen(4001, () => {
 function addNewComment(postID, comment) {
     const commentID = randomBytes(4).toString("hex");
 
+    const newComment = { 
+        id: commentID, 
+        comment, 
+        status: "Pending", 
+        statusReason: "Under moderation" 
+    };
+
     if (comments && comments.has(postID)) {
         // Get to current comments
-        var comments = comments.get(postID);
+        const currentComments = comments.get(postID);
         // Append new comment
-        comments.push({ id: commentID, comment, status: "Pending", status: "Under moderation" });
+        currentComments.push(newComment);
         // Update post
-        comments.set(postID, comments);
+        // comments.set(postID, currentComments);
     } else {
         // Create first post comment
         if (!comments) {
             comments = new Map();
         }
-        comments.set(postID, [{ id: commentID, comment, status:"Pending", status: "Under moderation" }]);
+        comments.set(postID, [newComment]);
     }
 
     return commentID;
+}
+
+function updateCommentStatus(postID, commentID, status, statusReason) {
+    if (comments.has(postID)) {
+        const commentsForPost = comments.get(postID);
+        commentsForPost.map(comment => {
+            if (comment.id == commentID) {
+                comment.status = status;
+                comment.statusReason = statusReason;
+            }
+        });
+    }
 }

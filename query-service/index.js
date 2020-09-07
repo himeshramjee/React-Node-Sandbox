@@ -7,20 +7,23 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-var posts = new Map();
+var cache = new Map();
 
-app.get("/posts", (req, res) => {
-    console.log(posts);
-    console.log(Object.fromEntries(posts));
-    res.status(200).send(Object.fromEntries(posts));
+app.get("/cache/posts", (req, res) => {
+    res.status(200).send(Object.fromEntries(cache));
 });
 
-app.get("/posts/rebuild", async (req, res) => {
-    // Clear list of posts, we'll query each service and rebuild it.
-    // Obviously this mechanism wouldn't work for large datasets.
-    posts.clear();
+app.post('/cache/reset-data', (req, res) => {
+    cache.clear();
+    res.status(200).send();
+});
 
-    // Fetch posts
+app.post("/cache/rebuild", async (req, res) => {
+    // Clear list of cache, we'll query each service and rebuild it.
+    // Obviously this mechanism wouldn't work for large datasets.
+    cache.clear();
+
+    // Fetch cache
     await axios.get("http://localhost:4000/posts")
         .then(response => {
             Object.entries(response.data).map(([postID, post]) => {
@@ -28,15 +31,21 @@ app.get("/posts/rebuild", async (req, res) => {
             });
         })
         .catch(e => {
-            console.log("QueryService: Failed to retrieve posts. Error: " + e);
+            console.log("QueryService: Failed to retrieve cache. Error: " + e);
         });
-        
+
     // Fetch comments for each post
-    Object.entries(posts).map(async ([postID, post]) => {
+    cache.forEach(async (item, postID) => {
         await axios.get(`http://localhost:4001/posts/${postID}/comments`)
             .then(response => {
-                Object.entries(response.data).map(([comment]) => {
-                    addNewComment(postID, comment.commentID, comment.comment);
+                response.data.map(commentItem => {
+                    addNewComment(
+                        postID, 
+                        commentItem.id, 
+                        commentItem.comment, 
+                        commentItem.status, 
+                        commentItem.statusReason
+                    );
                 });
             })
             .catch(e => {
@@ -44,7 +53,7 @@ app.get("/posts/rebuild", async (req, res) => {
             });
     });
 
-    res.status(200).send(posts);
+    res.status(200).send(cache);
 });
 
 app.post("/events", (req, res) => {
@@ -70,20 +79,26 @@ app.listen(4002, () => {
 });
 
 function addNewPost(postID, postTitle, comments) {
-    posts.set(postID, { title: postTitle, comments: comments });
-    console.log("New Post from event: " + postTitle);
+    cache.set(postID, { title: postTitle, comments: comments });
 }
 
-function addNewComment(postID, commentID, comment, status, statusReason) {
-    if (posts && posts.has(postID)) {
-        const comments = posts.get(postID).comments || [];
-        comments.push({ commentID: commentID, comment: comment, status: status, statusReason: statusReason });
+function addNewComment(postID, commentID, commentText, approvalStatus, statusReason) {
+    if (cache && cache.has(postID)) {
+        const comments = cache.get(postID).comments;
+        
+        comments.push({ 
+            commentID: commentID, 
+            comment: commentText, 
+            status: approvalStatus, 
+            statusReason: statusReason 
+        });
+        cache.get(postID).comments = comments;
     }
 }
 
 function updateComment(postID, commentID, comment, status, statusReason) {
-    if (posts && posts.has(postID)) {
-        const comments = posts.get(postID).comments;
+    if (cache && cache.has(postID)) {
+        const comments = cache.get(postID).comments;
         comments.map(commentItem => {
             if (commentItem.commentID === commentID) {
                 commentItem.status = status;
