@@ -27,7 +27,7 @@ app.post('/posts', (req, res) => {
         // Publish new post event
         axios.post("http://localhost:4005/events", event)
             .then(response => {
-                console.log("Published new Post event. Post ID: " + newPostID);
+                // console.log("Published new Post event. Post ID: " + newPostID);
             })
             .catch((e) => {
                 // Not hard failing the call. Assumes separate mechanism of dealing with entropy/bootstrapping the query service (or a other services data);

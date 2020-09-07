@@ -16,7 +16,6 @@ app.post('/comments/reset-data', (req, res) => {
 
 app.get('/posts/:id/comments', (req, res) => {
     const postID  = req.params.id;
-    console.log("Comments requested for postID: " + postID);
     res.send(comments.get(postID));
 });
 
@@ -42,7 +41,7 @@ app.post('/posts/:id/comments', (req, res) => {
         // Publish new post event
         axios.post("http://localhost:4005/events", event)
             .then(response => {
-                console.log("Published new Comment event. Post ID: " + postID + ". Comment ID: " + newCommentID);
+                // console.log("Published new Comment event. Post ID: " + postID + ". Comment ID: " + newCommentID);
             })
             .catch((e) => {
                 // Not hard failing the call. Assumes separate mechanism of dealing with entropy/bootstrapping the query service (or a other services data);

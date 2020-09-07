@@ -26,7 +26,7 @@ app.listen(4003, () => {
 });
 
 function handleNewCommentEvent(event) {
-    console.log("Processing new comment event with ID: " + event.eventID);
+    // console.log("Processing new comment event with ID: " + event.eventID);
     
     const naughtyWordResult = findNaughtyWord(event.eventData.comment);
     let newEvent = {};
@@ -41,7 +41,7 @@ function handleNewCommentEvent(event) {
     // Publish new post event
     axios.post("http://localhost:4005/events", newEvent)
         .then(response => {
-            console.log("Published new Comment Updated event. Comment ID: " + event.eventData.commentID);
+            // console.log("Published new Comment Updated event. Comment ID: " + event.eventData.commentID);
         })
         .catch((e) => {
             // Not hard failing the call. Assumes separate mechanism of dealing with entropy/bootstrapping the query service (or a other services data);
@@ -61,7 +61,7 @@ function findNaughtyWord(comment) {
     if (badItem) {
         return badItem;
     } else {
-        console.log("No bad words found.");
+        // console.log("No bad words found.");
         return null;
     }
 }

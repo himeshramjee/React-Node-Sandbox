@@ -59,24 +59,39 @@ app.post("/cache/rebuild", async (req, res) => {
 app.post("/events", (req, res) => {
     const event = req.body;
 
-    if (event.eventType === "NewPost") {
-        addNewPost(event.eventData.postID, event.eventData.title, []);
-    }
-
-    if (event.eventType === "NewComment") {
-        addNewComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment, event.eventData.status, event.eventData.statusReason);
-    }
-
-    if (event.eventType === "CommentUpdated") {
-        updateComment(event.eventData.postID, event.eventData.commentID, event.eventData.comment, event.eventData.status, event.eventData.statusReason);
-    }
+    handleBusEvent(event.eventType, event.eventData);
 
     res.status(200).send();
 });
 
-app.listen(4002, () => {
+app.listen(4002, async () => {
     console.log("QueryService: Listening for blog queries on port 4002.");
+
+    const response = await axios.get("http://localhost:4005/events")
+                        .catch(error => {
+                            console.log("Failed to get historical events to initialize query cache. Error: " + error);
+                        });
+
+    console.log("Processing historical events. Count of events is " + response.data.length);
+    for (let event of response.data) {
+        handleBusEvent(event.eventType, event.eventData);
+    }
+    console.log("Done processing historical events.");
 });
+
+function handleBusEvent(eventType, eventData) {
+    if (eventType === "NewPost") {
+        addNewPost(eventData.postID, eventData.title, []);
+    }
+
+    if (eventType === "NewComment") {
+        addNewComment(eventData.postID, eventData.commentID,  eventData.comment,  eventData.status,  eventData.statusReason);
+    }
+
+    if (eventType === "CommentUpdated") {
+        updateComment(eventData.postID, eventData.commentID, eventData.comment, eventData.status, eventData.statusReason);
+    }
+}
 
 function addNewPost(postID, postTitle, comments) {
     cache.set(postID, { title: postTitle, comments: comments });

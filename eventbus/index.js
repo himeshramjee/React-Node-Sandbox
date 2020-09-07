@@ -7,9 +7,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-let events = {};
+// This should be a more complex object with timestamps to allow for point in time event playback. Overkill at this stage so going with a simple array. Lastest event is pushed in at end of array.
+let events = [];
+
+// Poor mans service discovery anyone? :D
 const broadcastClientList = [
-    // Poor mans service discovery anyone? :D
     // { clientID : "0", clientEndpoint : "http://localhost:4000/events" },
     { clientID : "1", clientEndpoint : "http://localhost:4001/events" },
     { clientID : "2", clientEndpoint : "http://localhost:4002/events" },
@@ -17,15 +19,19 @@ const broadcastClientList = [
 ];
 
 app.post('/event-bus/reset-data', (req, res) => {
-    events = {};
+    events = [];
     res.status(200).send();
 });
 
-app.get("/events", (req, res) => {
+app.get("/events/metrics", (req, res) => {
     res.send({ 
-        eventCount : Object.keys(events) ? Object.keys(events).length : 0,
+        eventCount : events.length,
         subscriberCount : broadcastClientList.length
      });
+});
+
+app.get("/events", (req, res) => {
+    res.status(200).send(events);
 });
 
 app.post("/events", (req, res) => {
@@ -33,8 +39,8 @@ app.post("/events", (req, res) => {
     const eventID = randomBytes(4).toString("hex");
 
     // Store new event
-    event["eventID"] = eventID;
-    events[eventID] = event;
+    event.eventID = eventID;
+    events.push(event);
 
     // Broadcast to clients
     broadcastClientList.map(client => {
@@ -44,7 +50,6 @@ app.post("/events", (req, res) => {
             })
             .catch((e) => {
                 console.log("Failed to publish new event with ID: " + eventID + " to client with ID: " + client.clientID + ". Error: " + e);
-                // console.log(e);
         });
     });
 
