@@ -24,7 +24,7 @@ app.post("/cache/rebuild", async (req, res) => {
     cache.clear();
 
     // Fetch cache
-    await axios.get("http://localhost:4000/posts")
+    await axios.get("http://posts-clusterip-srv:4000/posts")
         .then(response => {
             Object.entries(response.data).map(([postID, post]) => {
                 addNewPost(postID, post.title, []);
@@ -36,7 +36,7 @@ app.post("/cache/rebuild", async (req, res) => {
 
     // Fetch comments for each post
     cache.forEach(async (item, postID) => {
-        await axios.get(`http://localhost:4001/posts/${postID}/comments`)
+        await axios.get(`http://comments-clusterip-srv:4001/posts/${postID}/comments`)
             .then(response => {
                 response.data.map(commentItem => {
                     addNewComment(
@@ -67,7 +67,7 @@ app.post("/events", (req, res) => {
 app.listen(4002, async () => {
     console.log("QueryService: Listening for blog queries on port 4002.");
 
-    const response = await axios.get("http://localhost:4005/events")
+    const response = await axios.get("http://event-bus-srv:4005/events")
                         .catch(error => {
                             console.log("Failed to get historical events to initialize query cache. Error: " + error);
                         });

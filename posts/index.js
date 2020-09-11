@@ -25,7 +25,7 @@ app.post('/posts', (req, res) => {
         // Create new post event
         const event = { "eventType": "NewPost", "eventData": { "postID": newPostID, "title": title }};
         // Publish new post event
-        axios.post("http://localhost:4005/events", event)
+        axios.post("http://event-bus-srv:4005/events", event)
             .then(response => {
                 // console.log("Published new Post event. Post ID: " + newPostID);
             })
@@ -44,5 +44,5 @@ app.post('/posts/reset-data', (req, res) => {
 });
 
 app.listen(4000, () => {
-    console.log("Posts: Listening for Blog Posts on 4000");
+    console.log("Posts v0.0.2: Listening for Blog Posts on 4000");
 });

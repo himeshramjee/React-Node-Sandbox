@@ -8,19 +8,19 @@ app.use(cors());
 
 app.post("/admin/reset-data", async (req, res) => {
 	// FIXME: Error handling and feedback
-	await axios.post("http://localhost:4000/posts/reset-data")
+	await axios.post("http://posts-clusterip-srv:4000/posts/reset-data")
 	.catch(error => {
 		console.log("Failed to reset posts data. Error: " + error);
 	});	
-	await axios.post("http://localhost:4001/comments/reset-data")
+	await axios.post("http://comments-clusterip-srv:4001/comments/reset-data")
 	.catch(error => {
 		console.log("Failed to reset comments data. Error: " + error);
 	});	
-	await axios.post("http://localhost:4002/cache/reset-data")
+	await axios.post("http://query-clusterip-srv:4002/cache/reset-data")
 	.catch(error => {
 		console.log("Failed to reset query cache data. Error: " + error);
 	});	
-	await axios.post("http://localhost:4005/event-bus/reset-data")
+	await axios.post("http://event-bus-srv:4005/event-bus/reset-data")
 	.catch(error => {
 			console.log("Failed to reset event-bus data. Error: " + error);
 	});	
@@ -29,7 +29,7 @@ app.post("/admin/reset-data", async (req, res) => {
 });
 
 app.post("/admin/rebuild-cache", async (req, res) => {
-	await axios.post("http://localhost:4002/cache/rebuild")
+	await axios.post("http://query-clusterip-srv:4002/cache/rebuild")
 	.catch(error => {
 		console.log("Failed to reset query cache data. Error: " + error);
 	});

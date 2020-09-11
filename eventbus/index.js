@@ -12,10 +12,10 @@ let events = [];
 
 // Poor mans service discovery anyone? :D
 const broadcastClientList = [
-    // { clientID : "0", clientEndpoint : "http://localhost:4000/events" },
-    { clientID : "1", clientEndpoint : "http://localhost:4001/events" },
-    { clientID : "2", clientEndpoint : "http://localhost:4002/events" },
-    { clientID : "3", clientEndpoint : "http://localhost:4003/events" }
+    // { clientID : "0", clientEndpoint : "http://posts-clusterip-srv:4000/events" },
+    { clientID : "1", clientEndpoint : "http://comments-clusterip-srv:4001/events" },
+    { clientID : "2", clientEndpoint : "http://query-clusterip-srv:4002/events" },
+    { clientID : "3", clientEndpoint : "http://moderator-clusterip-srv:4003/events" }
 ];
 
 app.post('/event-bus/reset-data', (req, res) => {
@@ -57,5 +57,5 @@ app.post("/events", (req, res) => {
 });
 
 app.listen(4005, () => {
-    console.log("EventBus: Listening for Blog events on port 4005");
+    console.log("EventBus v0.0.1: Listening for Blog events on port 4005");
 });

@@ -39,7 +39,7 @@ function handleNewCommentEvent(event) {
     }
 
     // Publish new post event
-    axios.post("http://localhost:4005/events", newEvent)
+    axios.post("http://event-bus-srv:4005/events", newEvent)
         .then(response => {
             // console.log("Published new Comment Updated event. Comment ID: " + event.eventData.commentID);
         })

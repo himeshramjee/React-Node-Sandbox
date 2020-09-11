@@ -7,7 +7,10 @@ export default () => {
     const [posts, setPosts] = useState({});
 
     const fetchPosts = async () => {
-        const response = await axios.get('http://localhost:4002/cache/posts');
+        const response = await axios.get('http://localhost:32696/cache/posts')
+        .catch(error => {
+            console.log("Failed to load posts from query cache. Error: " + error);
+        });
         setPosts(response.data);
     };
 

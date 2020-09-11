@@ -39,7 +39,7 @@ app.post('/posts/:id/comments', (req, res) => {
                 statusReason: "Under moderation" 
             }};
         // Publish new post event
-        axios.post("http://localhost:4005/events", event)
+        axios.post("http://event-bus-srv:4005/events", event)
             .then(response => {
                 // console.log("Published new Comment event. Post ID: " + postID + ". Comment ID: " + newCommentID);
             })
