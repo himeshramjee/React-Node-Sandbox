@@ -7,11 +7,17 @@ export default () => {
     const [posts, setPosts] = useState({});
 
     const fetchPosts = async () => {
-        const response = await axios.get('http://localhost:32696/cache/posts')
+        await axios.get('http://localhost:32103/cache/posts')
+        .then(response => {
+            if (response && response.data) {
+                setPosts(response.data);
+            } else {
+                console.log("Invalid reponse from query cache service.");
+            }
+        })
         .catch(error => {
             console.log("Failed to load posts from query cache. Error: " + error);
         });
-        setPosts(response.data);
     };
 
     useEffect(() => {
