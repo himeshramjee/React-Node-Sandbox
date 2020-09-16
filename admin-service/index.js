@@ -25,7 +25,7 @@ app.post("/admin/reset-data", async (req, res) => {
 			console.log("Failed to reset event-bus data. Error: " + error);
 	});	
 
-	res.status(200).send();
+	res.status(200).send({ "result": "Data reset completed." });
 });
 
 app.post("/admin/rebuild-cache", async (req, res) => {

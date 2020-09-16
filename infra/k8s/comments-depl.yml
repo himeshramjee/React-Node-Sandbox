@@ -44,9 +44,9 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: posts
+    app: comments
   ports:
-  - name: posts
+  - name: comments
     protocol: TCP
     port: 4001
     targetPort: 4001
