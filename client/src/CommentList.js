@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 export default ({ postComments }) => {
     const [commentItems, setComments] = useState([]);
-    
     const loadData = () => { setComments(postComments) };
-
-    useEffect(() => {
-        loadData();
-    }, []);
+    useEffect(loadData, []);
 
     const renderedComments = commentItems.map(commentItem => {
         if (commentItem.status === "Approved") {

@@ -5,7 +5,7 @@ export default () => {
     const onClickClearDataset = async (event) => {
         event.preventDefault();
 
-        await axios.post('http://localhost:32679/admin/reset-data')
+        await axios.post('http://posts.com:32679/admin/reset-data')
         .then(response => {
             if (response.status === 200) {
                 alert("Dataset cleared.");
@@ -21,7 +21,7 @@ export default () => {
     const onClickRebuildCache = async (event) => {
         event.preventDefault();
 
-        await axios.post('http://localhost:32679/admin/rebuild-cache')
+        await axios.post('http://posts.com:32679/admin/rebuild-cache')
         .then(response => {
             console.log(response);
             console.log(response.status);

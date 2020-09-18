@@ -7,8 +7,11 @@ export default () => {
     const onSubmit = async (event) => {
         event.preventDefault();
 
-        await axios.post('http://localhost:30221/posts', {
+        await axios.post('http://posts.com:30221/posts', {
             title
+        })
+        .catch(error => {
+            console.log("Failed to create post. Error: " + error);
         });
 
         setTitle('');
