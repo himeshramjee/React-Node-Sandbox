@@ -1,0 +1,68 @@
+apiVersion: skaffold/v2alpha3
+kind: Config
+metadata:
+  name: posts.com
+deploy:
+  kubectl:
+    manifests:
+      - ./infra/k8s/*
+build:
+  local: 
+    push: false
+  artifacts:
+    - image: himeshramjee/rns-client-webapp
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .
+    - image: himeshramjee/rns-admin-service
+      context: admin-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
+    - image: himeshramjee/rns-posts-service
+      context: posts
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
+    - image: himeshramjee/rns-comments-service
+      context: comments
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
+    - image: himeshramjee/rns-eventbus
+      context: eventbus
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
+    - image: himeshramjee/rns-moderator-service
+      context: moderator
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
+    - image: himeshramjee/rns-query-service
+      context: query-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '*.js'
+            dest: .
